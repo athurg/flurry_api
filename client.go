@@ -38,7 +38,7 @@ func (cli *Client) request(path string, q url.Values, result interface{}) error 
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 429 {
-		return fmt.Errorf("错误码[%d]，请求过于频繁(间隔不得低于一秒)")
+		return fmt.Errorf("错误码[%d]，请求太频繁(间隔不得低于一秒)", resp.StatusCode)
 	} else if resp.StatusCode != 200 {
 		return fmt.Errorf("错误码[%d]", resp.StatusCode)
 	}

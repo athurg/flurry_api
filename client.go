@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type Client struct {
@@ -15,6 +16,8 @@ func New(accessCode string) *Client {
 	return &Client{apiAccessCode: accessCode}
 }
 
+var lastRequestTime time.Time
+
 /*
 NOTE:
     接口解析采用的是XML而不是JSON，原因是day节点返回数据格式没有一致性。
@@ -24,6 +27,15 @@ NOTE:
 		{"day":[{"@date":"2016-04-01","@value":"52"}]}
 */
 func (cli *Client) request(path string, q url.Values, result interface{}) error {
+	//Flurry 规定请求最多一秒一次
+	d := time.Second - time.Since(lastRequestTime)
+	if d > 0 {
+		time.Sleep(d)
+	}
+	defer func() {
+		lastRequestTime = time.Now()
+	}()
+
 	httpClient := &http.Client{}
 	q.Set("apiAccessCode", cli.apiAccessCode)
 
